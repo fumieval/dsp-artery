@@ -3,7 +3,7 @@ module DSP.Artery.Biquad where
 
 import Control.Artery
 import Data.Reflection
-import DSP.Types
+import DSP.Artery.Types
 
 data FilterParam a = FilterParam
     { _filterCutOff :: a

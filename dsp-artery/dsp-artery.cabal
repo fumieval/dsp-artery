@@ -17,7 +17,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     DSP.Types, DSP.Artery.Biquad
+  exposed-modules:     DSP.Artery.Types, DSP.Artery.Biquad
   -- other-modules:       
   other-extensions:    Rank2Types, DeriveFunctor, FlexibleContexts
   build-depends:       base == 4.*, artery >=0.1 && <0.2, reflection == 1.*

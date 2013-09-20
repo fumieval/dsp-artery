@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts, Rank2Types #-}
 module DSP.Artery.PortAudio (DeviceSettings(..), withStream) where
 
 import Control.Artery
@@ -11,6 +12,8 @@ import Control.Concurrent
 import Foreign.Ptr
 import Linear
 import Data.Default
+import Data.Reflection
+import DSP.Artery.Types
 
 audioCallback :: IORef (Artery IO (V2 CFloat) (V2 CFloat)) -> PA.StreamCallback CFloat CFloat
 audioCallback ref _ _ frames _in _out = do
@@ -44,9 +47,9 @@ instance Default DeviceSettings where
         , _bufferSize = Nothing
         }
 
-withStream :: DeviceSettings -> Artery IO (V2 CFloat) (V2 CFloat) -> IO a -> IO (Either PA.Error a)
+withStream :: DeviceSettings -> (Given SampleRate => Artery IO (V2 CFloat) (V2 CFloat)) -> IO a -> IO (Either PA.Error a)
 withStream setting ar m = do
-    ref <- newIORef ar
+    ref <- newIORef $ give (SampleRate $ _sampleRate setting) ar
     PA.withPortAudio $ PA.withStream
         (fmap (\i -> PA.StreamParameters (PaDeviceIndex $ fromIntegral i) 2 (PaTime 0.0)) (_inputDeviceId setting))
         (fmap (\i -> PA.StreamParameters (PaDeviceIndex $ fromIntegral i) 2 (PaTime 0.0)) (_outputDeviceId setting))
