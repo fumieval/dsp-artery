@@ -20,6 +20,6 @@ library
   exposed-modules:     DSP.Artery.Types, DSP.Artery.Biquad, DSP.Artery.Oscillator
   -- other-modules:       
   other-extensions:    Rank2Types, DeriveFunctor, FlexibleContexts
-  build-depends:       base == 4.*, artery >=0.1 && <0.2, reflection == 1.*
+  build-depends:       base == 4.*, artery >=0.1 && <0.2, reflection == 1.*, vector >= 0.9 && < 0.11
   -- hs-source-dirs:      
   default-language:    Haskell2010
