@@ -5,22 +5,22 @@ import Control.Artery
 import qualified Sound.PortAudio as PA
 import qualified Sound.PortAudio.Base as PA
 import Foreign.Storable
-import Foreign.C.Types
 import Data.IORef
 import Control.Monad
 import Control.Concurrent
 import Foreign.Ptr
+import Foreign.C.Types
 import Linear
 import Data.Reflection
 import DSP.Artery.Types
 import DSP.Artery.IO.Types
 
-audioCallback :: IORef (Artery IO () (V2 CFloat)) -> PA.StreamCallback CFloat CFloat
+audioCallback :: IORef (Artery IO () (V2 Float)) -> PA.StreamCallback CFloat CFloat
 audioCallback ref _ _ frames _in _out = do
     readIORef ref >>= write 0 >>= writeIORef ref
     return PA.Continue
     where
-        out :: Ptr (V2 CFloat)
+        out :: Ptr (V2 Float)
         out = castPtr _out
 
         write i ar
@@ -29,7 +29,7 @@ audioCallback ref _ _ frames _in _out = do
                 unArtery ar () $ \o cont -> pokeElemOff out i o
                     >> write (succ i) cont
 
-withStream :: DeviceSettings -> (Given SampleRate => Artery IO () (V2 CFloat)) -> IO a -> IO a
+withStream :: DeviceSettings -> (Given SampleRate => Artery IO () (V2 Float)) -> IO a -> IO a
 withStream setting ar m = do
     ref <- newIORef $ give (SampleRate $ sampleRate setting) ar
     res <- PA.withPortAudio $ PA.withStream

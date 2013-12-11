@@ -1,27 +1,27 @@
 {-# LANGUAGE CPP, Rank2Types, FlexibleContexts #-}
-module DSP.Artery.IO(withStream, DeviceSettings(..), Backend(..)) where
+module DSP.Artery.IO(withStream, DeviceSettings(..), def, Backend(..)) where
 
 import DSP.Artery.IO.Types
 import Linear
 import Control.Artery
-import Foreign.C.Types
 import DSP.Artery.Types
 import Data.Reflection
+import Data.Default
 
-#ifdef D_DSOUND
-import DSP.Artery.Device.DirectSound as DSound
+#ifdef DSOUND
+import qualified DSP.Artery.IO.DirectSound as DSound
 #endif
 
-#ifdef D_PORTAUDIO
-import qualified DSP.Artery.Device.PortAudio as PortAudio
+#ifdef PORTAUDIO
+import qualified DSP.Artery.IO.PortAudio as PortAudio
 #endif
 
-withStream :: DeviceSettings -> (Given SampleRate => Artery IO () (V2 CFloat)) -> IO a -> IO a
+withStream :: DeviceSettings -> (Given SampleRate => Artery IO () (V2 Float)) -> IO a -> IO a
 
-#ifdef D_DSOUND
+#ifdef DSOUND
 
-#ifdef D_PORTAUDIO
-withStream param = case preferredBackend of
+#ifdef PORTAUDIO
+withStream param = case preferredBackend param of
     DirectSound -> DSound.withStream param
     PortAudio -> PortAudio.withStream param
 #else
@@ -30,8 +30,8 @@ withStream = DSound.withStream
 
 #else
 
-#ifdef D_PORTAUDIO
-withStream = DSound.withStream
+#ifdef PORTAUDIO
+withStream = PortAudio.withStream
 #else
 withStream = error "No backends"
 #endif

@@ -21,7 +21,8 @@ Flag portaudio
   Default:           True
 
 library
-  exposed-modules:     DSP.Artery.IO
+  exposed-modules:     DSP.Artery.IO, DSP.Artery.IO.Types
+  ghc-options: -threaded
   -- other-modules:       
   -- other-extensions: 
   build-depends: base == 4.*
@@ -33,12 +34,12 @@ library
 
   if flag(directsound)
     build-depends: DirectSound < 0.1
-    cpp-options:     -D_DSOUND
+    cpp-options:     -DDSOUND
     other-modules: DSP.Artery.IO.DirectSound
 
   if flag(portaudio)
     build-depends: portaudio >=0.2 && <0.3
-    cpp-options:     -D_PORTAUDIO
+    cpp-options:     -DPORTAUDIO
     other-modules: DSP.Artery.IO.PortAudio
 
   -- hs-source-dirs:      
