@@ -13,3 +13,4 @@ theSampleRate = getSampleRate given
 
 withSampleRate :: forall a. (Given SampleRate => a) -> Int -> a
 withSampleRate r i = give (SampleRate i) r
+{-# INLINE withSampleRate #-}
