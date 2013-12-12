@@ -7,11 +7,9 @@ import Control.Artery
 import Data.Maybe
 import Data.IORef
 import qualified Sound.Win32.DirectSound as DS
-import DSP.Artery.Types
 import DSP.Artery.IO.Types
 import Linear
 import Foreign
-import Data.Reflection
 
 audioCallback :: IORef (Artery IO () (V2 Float)) -> Ptr Int16 -> Word32 -> IO ()
 audioCallback ref buf frames = readIORef ref >>= write 0 >>= writeIORef ref where
@@ -24,7 +22,7 @@ audioCallback ref buf frames = readIORef ref >>= write 0 >>= writeIORef ref wher
             unArtery ar () $ \o cont -> pokeElemOff out i (fmap (floor . (*32768)) o)
                 >> write (succ i) cont
 
-withStream :: DeviceSettings -> (Given SampleRate => Artery IO () (V2 Float)) -> IO a -> IO a
+withStream :: DeviceSettings -> (Int -> Artery IO () (V2 Float)) -> IO a -> IO a
 withStream param ar m = do
     devs <- DS.enumerateDrivers
     drv <- case devs of
@@ -43,7 +41,7 @@ withStream param ar m = do
         Left err -> fail err
         Right sb -> return sb
 
-    ref <- newIORef $ give (SampleRate $ sampleRate param) ar
+    ref <- newIORef $ ar $ sampleRate param
 
     stop <- DS.playWithDoubleBuffering buf (audioCallback ref)
     r <- m

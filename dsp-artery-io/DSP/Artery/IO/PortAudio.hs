@@ -11,8 +11,6 @@ import Control.Concurrent
 import Foreign.Ptr
 import Foreign.C.Types
 import Linear
-import Data.Reflection
-import DSP.Artery.Types
 import DSP.Artery.IO.Types
 
 audioCallback :: IORef (Artery IO () (V2 Float)) -> PA.StreamCallback CFloat CFloat
@@ -29,9 +27,9 @@ audioCallback ref _ _ frames _in _out = do
                 unArtery ar () $ \o cont -> pokeElemOff out i o
                     >> write (succ i) cont
 
-withStream :: DeviceSettings -> (Given SampleRate => Artery IO () (V2 Float)) -> IO a -> IO a
+withStream :: DeviceSettings -> (Int -> Artery IO () (V2 Float)) -> IO a -> IO a
 withStream setting ar m = do
-    ref <- newIORef $ give (SampleRate $ sampleRate setting) ar
+    ref <- newIORef $ ar $ sampleRate setting
     res <- PA.withPortAudio $ PA.withStream
         Nothing
         (fmap (\i -> PA.StreamParameters (PA.PaDeviceIndex $ fromIntegral i) 2 (PA.PaTime 0.0)) (deviceId setting))

@@ -3,21 +3,28 @@
 
 name:                dsp-artery
 version:             0.1
--- synopsis:            
--- description:         
+synopsis:            Digital signal processing based on arteries
+description:         
 homepage:            https://github.com/fumieval/dsp-artery
 license:             BSD3
 license-file:        LICENSE
 author:              Fumiaki Kinoshita
 maintainer:          Fumiaki Kinoshita <fumiexcel@gmail.com>
--- copyright:           
+copyright:           
 category:            DSP
 build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     DSP.Artery.Types, DSP.Artery.Biquad, DSP.Artery.Oscillator
+  ghc-options: -O2 -threaded -fexcess-precision
+  exposed-modules:
+    DSP.Artery.Types
+    DSP.Artery.Filter.Biquad
+    DSP.Artery.Filter.Moog
+    DSP.Artery.Filter.Types
+    DSP.Artery.Oscillator
+    DSP.Artery.Envelope
   -- other-modules:       
   other-extensions:    Rank2Types, DeriveFunctor, FlexibleContexts
   build-depends:       base == 4.*, artery >=0.1 && <0.2, reflection == 1.*, vector >= 0.9 && < 0.11

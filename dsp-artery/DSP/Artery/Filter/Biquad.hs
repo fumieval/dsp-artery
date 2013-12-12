@@ -1,14 +1,10 @@
 {-# LANGUAGE Rank2Types, DeriveFunctor, FlexibleContexts #-}
-module DSP.Artery.Biquad where
+module DSP.Artery.Filter.Biquad (biquadFilter, lowpass, highpass, bandpass, notch, allpass, peaking, module DSP.Artery.Filter.Types) where
 
 import Control.Artery
 import Data.Reflection
 import DSP.Artery.Types
-
-data FilterParam a = FilterParam
-    { _filterCutOff :: a
-    , _filterQ :: a
-    }
+import DSP.Artery.Filter.Types
 
 data BiquadParam a = BiquadParam !a !a !a !a !a !a deriving (Show, Read, Eq, Ord, Functor)
 

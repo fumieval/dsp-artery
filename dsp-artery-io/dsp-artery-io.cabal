@@ -22,15 +22,13 @@ Flag portaudio
 
 library
   exposed-modules:     DSP.Artery.IO, DSP.Artery.IO.Types
-  ghc-options: -threaded
+  ghc-options: -threaded -fexcess-precision -O2
   -- other-modules:       
   -- other-extensions: 
   build-depends: base == 4.*
         , artery >=0.1 && <0.2
         , linear == 1.*
-        , dsp-artery == 0.1.*
         , data-default
-        , reflection ==　1.*
 
   if flag(directsound)
     build-depends: DirectSound < 0.1

@@ -4,8 +4,6 @@ module DSP.Artery.IO(withStream, DeviceSettings(..), def, Backend(..)) where
 import DSP.Artery.IO.Types
 import Linear
 import Control.Artery
-import DSP.Artery.Types
-import Data.Reflection
 import Data.Default
 
 #ifdef DSOUND
@@ -16,7 +14,7 @@ import qualified DSP.Artery.IO.DirectSound as DSound
 import qualified DSP.Artery.IO.PortAudio as PortAudio
 #endif
 
-withStream :: DeviceSettings -> (Given SampleRate => Artery IO () (V2 Float)) -> IO a -> IO a
+withStream :: DeviceSettings -> (Int -> Artery IO () (V2 Float)) -> IO a -> IO a
 
 #ifdef DSOUND
 
