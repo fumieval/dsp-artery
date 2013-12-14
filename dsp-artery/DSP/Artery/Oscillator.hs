@@ -6,26 +6,29 @@ import Data.Reflection
 import DSP.Artery.Types
 import qualified Data.Vector as V
 
-ring :: V.Vector a -> Artery m Float a
+ring :: V.Vector a -> Artery m (Float, Float) a
 ring v = go 0 where
+    n = fromIntegral (V.length v)
     go i
-        | floor i >= V.length v = go $ i - fromIntegral (V.length v)
-        | otherwise = Artery $ \rate cont -> cont (v V.! floor i) (go (i + rate))
+        | i >= n = go $ i - n
+        | otherwise = Artery $ \(rate, phase) cont -> let p = i + phase / (2 * pi)
+            in cont (v V.! (floor p `mod` V.length v)) (go (i + rate))
 
-sineWave :: (Floating a, Ord a, Given SampleRate) => Artery m a a
+sineWave :: (Floating a, Ord a, Given SampleRate) => Artery m (a, a) a
 sineWave = go 0 where
-    k = 2 * pi / getSampleRate given
+    k = 2 * pi / theSampleRate
     go i
-        | i > 2 * pi = go (i - 2 * pi)
-        | otherwise = Artery $ \freq cont -> cont (sin i) (go (i + k * freq))
+        | i > 2 * pi = go $! i - 2 * pi
+        | otherwise = Artery $ \(freq, phase) cont -> cont (sin $! i + phase) (go $! i + k * freq)
+    {-# INLINE go #-}
 
-sawWave :: (Given SampleRate, Fractional a) => Artery m Float a
-sawWave = ring $ V.iterateN (getSampleRate given) ((2/getSampleRate given)+) (-1)
+sawWave :: (Given SampleRate, Fractional a) => Artery m (Float, Float) a
+sawWave = ring $ V.iterateN theSampleRate ((2/theSampleRate)+) (-1)
 
-squareWave :: (Given SampleRate, Num a) => Artery m Float a
-squareWave = let n = getSampleRate given `div` 2
+squareWave :: (Given SampleRate, Num a) => Artery m (Float, Float) a
+squareWave = let n = theSampleRate `div` 2
     in ring $ V.fromList $ replicate n (-1) ++ replicate n 1 
 
-triangleWave :: (Given SampleRate, Fractional a) => Artery m Float a
-triangleWave = let n = getSampleRate given `div` 2
+triangleWave :: (Given SampleRate, Fractional a) => Artery m (Float, Float) a
+triangleWave = let n = theSampleRate `div` 2
     in ring $ V.fromList $ map ((/fromInteger n) . fromInteger) [0..n-1] ++ map ((1-) . (/fromInteger n) . fromInteger) [0..n-1]

@@ -29,13 +29,13 @@ genADSR tA tD sus tR = go Idle 0 where
         True -> update s z $ \s' z' -> cont z' (go s' z')
 
     update Attack z cont
-        | z < 1.0 = cont Attack (bA + z * kA)
+        | z < 1.0 = cont Attack (min 1 $ bA + z * kA)
         | otherwise = cont Decay 1
     update Decay z cont
-        | z > sus = cont Decay (bD + z * kD)
+        | z > sus = cont Decay (max sus $ bD + z * kD)
         | otherwise = cont Sustain sus
     update Sustain z cont = cont Sustain z
     update Release z cont
-        | z > 0 = cont Release (bR + z * kR)
+        | z > 0 = cont Release (max 0 $ bR + z * kR)
         | otherwise = cont Idle 0
     update Idle z cont = cont Idle z
