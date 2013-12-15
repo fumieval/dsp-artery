@@ -29,6 +29,7 @@ library
         , artery >=0.1 && <0.2
         , linear == 1.*
         , data-default
+        , WAVE < 0.2
 
   if flag(directsound)
     build-depends: DirectSound < 0.1

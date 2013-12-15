@@ -84,20 +84,20 @@ stereo a b = Artery
 stereo' :: Artery m a a -> Artery m (V2 a) (V2 a)
 stereo' a = stereo a a
 
-main = withStream def { bufferSize = Just 4096 } (withSampleRate
-        $ runPlaylist song >>> arr sum >>> stereo' (saturator 1))
-    $ threadDelay (60 * 60 * 1000 * 1000) where
+main = withStream def (withSampleRate gen) $ threadDelay (40 * 1000 * 1000) where
+    gen :: Given SampleRate => Artery IO () (V2 Float)
+    gen = runPlaylist song >>> arr sum >>> stereo' (saturator 1)
     song :: Given SampleRate => Playlist (V2 Float) a
     song = do
         i <- start intro
         wait (4 * 2)
         stop i
         forever $ do
-            i <- start bassline
-            j <- start mainMelody
+            i <- start (pure (220, 0) >>> sineWave >>> arr pure) -- bassline
+            --j <- start mainMelody
             wait (4 * 8)
             stop i
-            stop j
+            -- stop j
 
 type Synth a = Given SampleRate => Artery m (Float, Bool) a
 
@@ -111,7 +111,7 @@ bass :: Synth Float
 bass = proc (freq, gate) -> do
     w <- sawWave -< (freq, 0)
     env <- genADSR 0.001 2 0 1 -< gate
-    Moog.lowpass -< (w, FilterParam (env * 0.8) 4)
+    saturator 8 <<< Moog.lowpass -< (w, (env * 0.8, 4))
 
 bundle :: Num b => [Artery m a b] -> Artery m a b
 bundle xs = Artery $ \i cont -> go i xs $ \o rs -> cont o (bundle rs) where
@@ -130,7 +130,7 @@ lead = proc (freq, gate) -> do
         , (22, 0.002), (24, 0.001), (26, 0.001)]
         -< (freq * (1 + vib * 0.005), 0)
     env <- genADSR 0.1 2 1 1 -< gate
-    Moog.lowpass -< (s, FilterParam (env * 0.9) 1)
+    Moog.lowpass -< (s, (env * 0.9, 1))
 
 intro :: Given SampleRate => Artery m () (V2 Float)
 intro = melody 4 12 [4, 5, 7, 7, 12, 12, 4, 5, 7, 12, 14, 16, 14, 11, 12, 12,
@@ -169,5 +169,4 @@ bassline = melody 2 (-12) [
     -7, 5, -2, 10, -9, 3, -9, 3]
     &&& rhythm "*-*-"
     >>> bass
-    >>> saturator 8
     >>> arr pure

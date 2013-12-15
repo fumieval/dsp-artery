@@ -1,15 +1,14 @@
 {-# LANGUAGE BangPatterns #-}
-module DSP.Artery.Filter.Moog (lowpass, module DSP.Artery.Filter.Types) where
+module DSP.Artery.Filter.Moog (lowpass) where
 
 import Control.Artery
 import Data.Reflection
 import DSP.Artery.Types
-import DSP.Artery.Filter.Types
 
 -- | http://musicdsp.org/archive.php?classid=3#26
-lowpass :: Fractional a => Artery m (a, FilterParam a) a
+lowpass :: Fractional a => Artery m (a, (a, a)) a
 lowpass = go 0 0 0 0 0 0 0 0 where
-    go !x0 !x1 !x2 !x3 !y0 !y1 !y2 !y3 = Artery $ \(!x_, FilterParam freq res) cont -> do
+    go !x0 !x1 !x2 !x3 !y0 !y1 !y2 !y3 = Artery $ \(!x_, (freq, res)) cont -> do
         let f = freq * 1.16
             b = res * (1.0 - 0.15 * f * f)
             x = (x_ - y3 * b) * f^4 * 0.35013

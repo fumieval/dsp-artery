@@ -22,7 +22,6 @@ library
     DSP.Artery.Types
     DSP.Artery.Filter.Biquad
     DSP.Artery.Filter.Moog
-    DSP.Artery.Filter.Types
     DSP.Artery.Oscillator
     DSP.Artery.Envelope
   -- other-modules:       
