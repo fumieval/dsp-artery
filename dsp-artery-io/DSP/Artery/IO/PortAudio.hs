@@ -12,24 +12,19 @@ import Foreign.Ptr
 import Foreign.C.Types
 import Linear
 import DSP.Artery.IO.Types
+import Foreign.Marshal.Array
 
-audioCallback :: IORef (Artery IO () (V2 Float)) -> PA.StreamCallback CFloat CFloat
+audioCallback :: IORef (Artery IO Int [V2 CFloat]) -> PA.StreamCallback CFloat CFloat
 audioCallback ref _ _ frames _in _out = do
-    readIORef ref >>= write 0 >>= writeIORef ref
-    return PA.Continue
-    where
-        out :: Ptr (V2 Float)
-        out = castPtr _out
+    ar <- readIORef ref
+    unArtery ar (fromEnum frames) $ \o cont -> do
+        pokeArray (castPtr _out) o
+        writeIORef ref cont
+        return PA.Continue
 
-        write i ar
-            | i == fromEnum frames = return ar
-            | otherwise = do
-                unArtery ar () $ \o cont -> pokeElemOff out i o
-                    >> write (succ i) cont
-
-withStream :: DeviceSettings -> (Int -> Artery IO () (V2 Float)) -> IO a -> IO a
+withStream :: DeviceSettings -> Artery IO Int [V2 CFloat] -> IO a -> IO a
 withStream setting ar m = do
-    ref <- newIORef $ ar $ sampleRate setting
+    ref <- newIORef ar
     res <- PA.withPortAudio $ PA.withStream
         Nothing
         (fmap (\i -> PA.StreamParameters (PA.PaDeviceIndex $ fromIntegral i) 2 (PA.PaTime 0.0)) (deviceId setting))
